@@ -20,7 +20,7 @@ DPO, RLHF'e (Reinforcement Learning from Human Feedback) kıyasla daha basit ve 
 
 1.  **Depoyu Klonlama:**
     ```bash
-    git clone [https://github.com/kullanici-adiniz/dpo.git](https://github.com/kullanici-adiniz/dpo.git)
+    git clone [https://github.com/AbdulSametTurkmenoglu(https://github.com/AbdulSametTurkmenoglu/dpo.git)
     cd dpo
     ```
 
