@@ -1,81 +1,91 @@
-#  DPO (Direct Preference Optimization) Projesi
+# DPO (Direct Preference Optimization)
 
-Bu proje, Hugging Face `trl` (Transformer Reinforcement Learning), `peft` (QLoRA) ve `transformers` kütüphanelerini kullanarak bir dil modeline (örn: TinyLlama) DPO ile ince ayar yapar.
+A project for fine-tuning language models using Direct Preference Optimization with Hugging Face `trl`, `peft`, and `transformers` libraries. DPO is a simpler and more stable alternative to RLHF - it directly optimizes models using chosen/rejected response pairs instead of training a separate reward model.
 
-DPO, RLHF'e (Reinforcement Learning from Human Feedback) kıyasla daha basit ve stabil bir alternatiftir. Bir ödül modeli (reward model) eğitmek yerine, "tercih edilen" (chosen) ve "reddedilen" (rejected) yanıt çiftlerini kullanarak modeli doğrudan optimize eder.
+##  Features
 
+- **DPO Training**: Efficient training with `trl` library's `DPOTrainer` class
+- **QLoRA Integration**: Memory-efficient 4-bit quantization for GPU training
+- **Modular Architecture**: Clean separation of data processing, model initialization, and training logic
+- **Automatic Model Management**: Handles both policy (trainable) and reference (frozen) models automatically
+- **Flexible CLI**: Easy parameter configuration via `argparse`
+- **Interactive Inference**: Test your trained model with a simple chat interface
 
+##  Prerequisites
 
-##  Özellikler
+- Python 3.8+
+- CUDA-capable GPU (recommended for QLoRA)
+- 8GB+ RAM (16GB+ recommended)
 
-* **DPO:** `trl` kütüphanesinin `DPOTrainer` sınıfı ile verimli eğitim.
-* **QLoRA:** 4-bit kuantizasyon ile (CUDA GPU varsa) bellek-verimli eğitim.
-* **Modüler Yapı:** Veri işleme, model sınıfı ve eğitim script'i birbirinden ayrılmıştır.
-* **Referans Model Yönetimi:** DPO için gerekli olan 'policy' (eğitilen) ve 'reference' (sabit) modelleri otomatik olarak yönetir.
-* **CLI Desteği:** `argparse` ile model, veri seti, epoch gibi parametreleri komut satırından kolayca değiştirme.
+##  Installation
+```bash
+# Clone the repository
+git clone https://github.com/AbdulSametTurkmenoglu/dpo.git
+cd dpo
 
+# Create virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate  # Windows: .\.venv\Scripts\activate
 
+# Install dependencies
+pip install -r requirements.txt
+```
 
-##  Kurulum
+##  Usage
 
-1.  **Depoyu Klonlama:**
-    ```bash
-    git clone [https://github.com/AbdulSametTurkmenoglu(https://github.com/AbdulSametTurkmenoglu/dpo.git)
-    cd dpo
-    ```
+### Training
 
-2.  **Sanal Ortam (Önerilir):**
-    ```bash
-    python -m venv .venv
-    # Windows: .\.venv\Scripts\activate
-    # macOS/Linux: source .venv/bin/activate
-    ```
-
-3.  **Gerekli Kütüphaneleri Yükleme:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## ⚡ Kullanım
-
-### 1. Modeli Eğitme
-
-Ana eğitim script'i `train.py`'dir.
-
-**Varsayılan ayarlarla (TinyLlama + UltraFeedback verisi + QLoRA) eğitimi başlat:**
-
+**Basic training with default settings (TinyLlama + UltraFeedback dataset):**
 ```bash
 python train.py
 ```
 
-**Örnek 2: Daha fazla veri ve farklı beta değeri ile eğitim:**
-
+**Customized training parameters:**
 ```bash
 python train.py --num_samples 1000 --epochs 2 --beta 0.15 --output_dir dpo_model_v2
 ```
 
-**Örnek 3: Quantization olmadan (CPU veya MPS üzerinde):**
-
+**Training on CPU/MPS (without quantization):**
 ```bash
 python train.py --no_quantization
 ```
 
-Tüm argümanları görmek için:
+**Available training arguments:**
 ```bash
 python train.py --help
 ```
 
-### 2. Eğitilmiş Model ile Çıkarım (Inference)
+Key parameters:
+- `--model_name`: Base model to fine-tune (default: TinyLlama-1.1B-Chat-v1.0)
+- `--dataset_name`: HuggingFace dataset (default: argilla/ultrafeedback-binarized-preferences-cleaned)
+- `--num_samples`: Number of training samples (default: 500)
+- `--epochs`: Training epochs (default: 1)
+- `--beta`: DPO beta parameter for preference strength (default: 0.1)
+- `--output_dir`: Directory to save the trained model (default: dpo_tinyllama_model)
 
-Eğitim tamamlandığında (`dpo_tinyllama_model` klasörü oluştuğunda), `inference.py` script'ini kullanarak modelle interaktif olarak sohbet edebilirsiniz.
+### Inference
 
-Bu script, temel modeli yükler ve üzerine eğitilmiş LoRA adaptörünü uygular.
-
+**Interactive chat with trained model:**
 ```bash
 python inference.py
 ```
 
-Eğer farklı bir çıktı klasörü kullandıysanız:
+**Custom model path:**
 ```bash
 python inference.py --base_model "TinyLlama/TinyLlama-1.1B-Chat-v1.0" --adapter_path "dpo_model_v2"
 ```
+
+The inference script loads the base model and applies your trained LoRA adapter on top of it.
+
+
+##  How It Works
+
+1. **Data Loading**: Loads preference pairs (chosen/rejected responses) from HuggingFace datasets
+2. **Model Setup**: Initializes base model with optional QLoRA quantization
+3. **DPO Training**: Trains the model to prefer chosen responses over rejected ones
+4. **Adapter Saving**: Saves only the trained LoRA adapters (memory efficient)
+5. **Inference**: Loads base model + adapters for text generation
+
+## 📝 License
+
+MIT License
