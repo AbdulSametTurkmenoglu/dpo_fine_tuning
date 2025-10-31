@@ -86,6 +86,4 @@ The inference script loads the base model and applies your trained LoRA adapter 
 4. **Adapter Saving**: Saves only the trained LoRA adapters (memory efficient)
 5. **Inference**: Loads base model + adapters for text generation
 
-## 📝 License
 
-MIT License
